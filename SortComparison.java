@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 // -------------------------------------------------------------------------
 
 /**
@@ -62,42 +64,43 @@
      * @return array sorted in ascending order
      *
      */
-    static void quickSort (double a[]){
+    public static double[] quickSort (double a[]){
+    	assert a!=null;
     	sortQuick(a,0,a.length-1);
-    	
+    	return a;
 		
     }//end quicksort
     
-    private static void sortQuick(double a[], double low, double high) {
+    private static void sortQuick(double a[], int low, int high) {
     	if(high<=low) {
     		return;
     	}
     	
-    	double pivot = partition(a,low,high);
+    	int pivot = partition(a,low,high);
     	sortQuick(a,low,pivot-1);
     	sortQuick(a,pivot+1,high);
     }
     
-    private static double partition(double a[],double low, double high) {
-    	double pivot = a[(int)high];
-    	int i = (int)(low - 1);
-    	double temp;
-    	
-    	for(int j=0;j<a.length;j++) {
-    		if(a[j]<pivot) {
-    			i++;
-    			temp = a[i];
-    			a[i] = a[j];
-    			a[j] = temp;
-    		}
-    	}
-    	
-    	temp = a[i+1]; 
-        a[i+1] = a[(int)high]; 
-        a[(int)high] = temp; 
-        
-    	return i+1;
-    }
+    private static int partition(double[] a, int low, int high) {
+    	double pivot = a[high];  
+        int j = (low-1); 
+        int i;
+        double temp;
+        for (i=low; i<high; i++) {  
+            if (a[i] < pivot)  { 
+                j++;             
+                temp = a[j]; 
+                a[j] = a[i]; 
+                a[i] = temp; 
+            } 
+        } 
+ 
+        temp = a[j+1]; 
+        a[j+1] = a[high]; 
+        a[high] = temp; 
+  
+        return j+1; 
+      }
 
     /**
      * Sorts an array of doubles using Merge Sort.
@@ -115,51 +118,21 @@
      */
 
     static double[] mergeSortIterative (double a[]) {
-    	if(a==null) {
-    		return null;
-    	}
-    	
-    	if(a.length>1) {
-    		double mid = a.length/2;
-    		
-    		double[] left = new double[(int)mid];
-    		double[] right = new double[a.length-(int)mid];
-    		int i,j,k;    		
-    		
-    		for(i=0;i<left.length;i++) {
-    			left[i] = a[i];
-    		}
-    		
-    		//CHECK HERE COULD BE AN ERROR
-    		
-    		for(i=0;i<right.length;i++) {
-    			right[i] = a[(int)mid+i+1];
-    		}
-    		
-    		i=0;
-    		j=0;
-    		k=0;
-    		while(i<left.length && j<right.length) {
-    			if(left[i]<right[j]) {
-    				a[k++] = left[i++];
-    			}
-    			
-    			else {
-    				a[k++] = right[j++];
-    			}
-    		}
-    		
-    		while(i<left.length) {
-    			a[k++] = left[i++];
-    		}
-    		
-    		while(j<right.length) {
-    			a[k++] = right[j++];
-    		}
-    		
-    	}
-    	
-    	
+
+		int low = 0;
+		int high = a.length - 1;
+
+		double[] temp = Arrays.copyOf(a, a.length);
+		
+		for (int m = 1; m <= high - low; m = 2*m){
+			for (int i = low; i < high; i += 2*m){
+				int from = i;
+				int mid = i + m - 1;
+				int to = Math.min(i + 2 * m - 1, high);
+
+				merge(a, temp, from, mid, to);
+			}
+		}
 		return a;
 	
     }//end mergesortIterative
@@ -173,73 +146,44 @@
      * @param a: An unsorted array of doubles.
      * @return after the method returns, the array must be in ascending sorted order.
      */
-    static double[] mergeSortRecursive (double a[]) {
-    	
-    	sortMerge(a,0,a.length-1);
-    	return a;
-	
-   }//end mergeSortRecursive
-    	
-    private static void sortMerge(double[] a, double low, double high) {
-    	if(low<high) {
-    		double mid = (low + high)/2;
-    		
-    		sortQuick(a,low,mid);
-    		sortQuick(a,mid+1,high);
-    		
-    		merge(a,low,mid,high);
-    	}
-    	
-    }
-    
-    private static void merge(double[] a, double low, double mid, double high) {
-    	int i,j,k;
-    	
-    	int s1 = (int)(mid-low+1.0);
-    	int s2 = (int)(high-mid);
-    	
-    	double[] left = new double[s1];
-    	double[] right = new double[s2];
-    	
-    	for(i=0;i<s1;i++) {
-    		left[i] = a[(int)low + i];
-    	}
-    	
-    	for(j=0;j<s2;j++) {
-    		right[j] = a[(int)mid + 1 + j];
-    	}
-    	
-    	i=0;
-    	j=0;
-    	k=0;
-    	
-    	while(i<s1 && j<s2) {
-    		if(left[i]<=right[j]) {
-    			a[k] = left[i++];
-    		}
-    		
-    		else {
-    			a[k] = right[j++];
-    		}
-    		
-    		k++;
-    	}
-    	
-    	while(i<s1) {
-    		a[k++] = left[i++];
-    	}
-    	
-    	while(j<s2) {
-    		a[k++] = right[j++];
-    	}
-    	
-    }
-    
-
-    
-    public static void main(String[] args) {
-    	
+    public static double[] mergeSortRecursive(double[] a) {
+        assert a != null;
         
-    }
+        double[] temp = new double[a.length];
+        mergeSortRecursive(a, temp, 0, a.length - 1);
+        return a;
+      }//end mergeSortRecursive
+    	
+    private static void mergeSortRecursive(double[] a, double[] temp, int low, int high) {
+        if (high <= low) 
+        	return;
+        
+        int mid = low + (high - low) / 2;
+        mergeSortRecursive(a, temp, low, mid);
+        mergeSortRecursive(a, temp, mid + 1, high);
+        merge(a, temp, low, mid, high);
+      }
+    
+    private static void merge(double a[], double temp[], int low, int mid, int high)
+    {
+    	System.arraycopy(a, low, temp, low, high - low + 1);
 
+        int i = low;
+        int j = mid + 1;
+        for (int k = low; k <= high; k++) {
+          if (i > mid) 
+        	  a[k] = temp[j++];
+          
+          else if (j > high)
+        	  a[k] = temp[i++];
+          
+          else if (a[j] < temp[i])
+        	  a[k] = temp[j++];
+          
+          else 
+        	  a[k] = temp[i++];
+        }
+   }
+    
+    
  }//end class
